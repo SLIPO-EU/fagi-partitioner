@@ -1,0 +1,10 @@
+.svn*
+*.DS_Store
+*.nt
+*.csv
+*.txt
+/src/main/resources/**/*.xml
+util
+target
+nbactions.xml
+/nbproject/
