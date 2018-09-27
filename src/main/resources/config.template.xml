@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<partitioning>
+	<datasetA></datasetA>
+	<datasetB></datasetB>
+	<links></links>
+	<linkSize></linkSize>
+	<fusionMode>l_mode</fusionMode>
+	<outputDir></outputDir>
+</partitioning>

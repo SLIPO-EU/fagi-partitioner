@@ -17,10 +17,16 @@ Go to the target directory of the project and run:
 
 ### Config.xml file
 
-Inside the resources directory of the project there is a config.xml file. 
+Inside the resources directory of the project there is a config.template.xml file. 
 
 `datasetA` the path of the first dataset.
+
 `datasetB` the path of the second dataset.
+
 `links` the path of the links file.
+
 `linkSize` the number of links to use for each partition group.
+
 `outputDir` the output directory path for the partitioning results.
+
+

@@ -3,7 +3,7 @@
 *.nt
 *.csv
 *.txt
-/src/main/resources/**/*.xml
+/src/main/resources/**/*config.xml
 util
 target
 nbactions.xml
