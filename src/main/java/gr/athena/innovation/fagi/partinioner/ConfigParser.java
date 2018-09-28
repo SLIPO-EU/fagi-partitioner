@@ -40,7 +40,7 @@ public class ConfigParser {
 
             doc.getDocumentElement().normalize();
 
-            NodeList out = doc.getElementsByTagName(PartitioningConstants.OUTPUT_DIR);
+            NodeList out = doc.getElementsByTagName(Constants.XML.OUTPUT_DIR);
             String outputDir = out.item(0).getTextContent();
             
             if(!new File(outputDir).isDirectory()){
@@ -48,23 +48,23 @@ public class ConfigParser {
             }
             configuration.setOutputDir(outputDir);
 
-            NodeList a = doc.getElementsByTagName(PartitioningConstants.DATASET_A);
+            NodeList a = doc.getElementsByTagName(Constants.XML.DATASET_A);
             String datasetA = a.item(0).getTextContent();
             configuration.setDatasetA(datasetA);
 
-            NodeList b = doc.getElementsByTagName(PartitioningConstants.DATASET_B);
+            NodeList b = doc.getElementsByTagName(Constants.XML.DATASET_B);
             String datasetB = b.item(0).getTextContent();
             configuration.setDatasetB(datasetB);
 
-            NodeList l = doc.getElementsByTagName(PartitioningConstants.LINKS);
+            NodeList l = doc.getElementsByTagName(Constants.XML.LINKS);
             String links = l.item(0).getTextContent();
             configuration.setLinks(links);
             
-            NodeList s = doc.getElementsByTagName(PartitioningConstants.LINK_SIZE);
+            NodeList s = doc.getElementsByTagName(Constants.XML.LINK_SIZE);
             String size = s.item(0).getTextContent();
             configuration.setLinkSize(size);
 
-            NodeList m = doc.getElementsByTagName(PartitioningConstants.FUSION_MODE);
+            NodeList m = doc.getElementsByTagName(Constants.XML.FUSION_MODE);
             String modeString = m.item(0).getTextContent();
             EnumOutputMode mode = EnumOutputMode.fromString(modeString.toUpperCase());
             switch(mode) {

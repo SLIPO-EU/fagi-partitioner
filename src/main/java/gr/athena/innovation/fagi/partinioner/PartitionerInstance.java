@@ -42,7 +42,7 @@ public class PartitionerInstance {
 
         long start = System.currentTimeMillis();
 
-        Path resultPath = Files.createDirectories(Paths.get(outputDir));
+        Path outputDirPath = Files.createDirectories(Paths.get(outputDir));
 
         //The following List read all lines of links in memory. Can take the whole links file,
         //or a part of a bigger links file as input. Here we use the whole file that contains all links.
@@ -78,11 +78,12 @@ public class PartitionerInstance {
 
             List<String> sublist = lines.subList(i, Math.min(i + partitionSize, lines.size()));
 
-            Path partitionPath = Paths.get(resultPath + "/partition_" + sublistIndex);
+            Path partitionPath = getPartitionPath(outputDirPath, sublistIndex);
             Files.createDirectories(partitionPath);
 
-            Path tempPath = Paths.get(partitionPath + "/links_" + sublistIndex + ".nt");
-            Files.write(tempPath, sublist, StandardCharsets.UTF_8);
+            Path sublinksPath = Paths.get(partitionPath + Constants.Path.SLASH + Constants.Path.LINKS 
+                    + Constants.Path.UNDERSCORE + sublistIndex + Constants.Path.NT);
+            Files.write(sublinksPath, sublist, StandardCharsets.UTF_8);
 
             subLists.add(sublist);
             sublistIndex++;
@@ -97,11 +98,11 @@ public class PartitionerInstance {
 
         sublistIndex = 1;
         for (List<String> subList : subLists) {
-            Path tempPartitionPath = Paths.get(resultPath + "/partition_" + sublistIndex);
-            LOG.info("Computing for partition path: " + tempPartitionPath);
+            Path partitionPath = getPartitionPath(outputDirPath, sublistIndex);
+            LOG.info("Computing for partition path: " + partitionPath);
             Integer group = subList.hashCode();
             for (String link : subList) {
-                String[] parts = link.split(" ");
+                String[] parts = link.split(Constants.SPLIT);
                 String idAPart = parts[0];
                 String idBPart = parts[2];
 
@@ -110,8 +111,10 @@ public class PartitionerInstance {
 
                 linksMap.put(idA, idB);
 
-                mapForDatasetA.put(idA, tempPartitionPath + "/" + group.toString() + "_A" + sublistIndex + ".nt");
-                mapForDatasetB.put(idB, tempPartitionPath + "/" + group.toString() + "_B" + sublistIndex + ".nt");
+                mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH + group.toString() 
+                        + Constants.Path.UNDERSCORE + Constants.Path.A + sublistIndex + Constants.Path.NT);
+                mapForDatasetB.put(idB, partitionPath + Constants.Path.SLASH + group.toString() 
+                        + Constants.Path.UNDERSCORE + Constants.Path.B + sublistIndex + Constants.Path.NT);
 
             }
             sublistIndex++;
@@ -163,6 +166,14 @@ public class PartitionerInstance {
 
     }
 
+    private Path getPartitionPath(Path resultPath, int sublistIndex) {
+        
+        Path partitionPath = Paths.get(resultPath + Constants.Path.SLASH + Constants.Path.PARTITION 
+                + Constants.Path.UNDERSCORE + sublistIndex);
+
+        return partitionPath;
+    }
+
     public static BufferedReader newBufferedReader(Path path, Charset cs) throws IOException {
         CharsetDecoder decoder = cs.newDecoder();
         Reader reader = new InputStreamReader(newInputStream(path), decoder);
@@ -170,11 +181,11 @@ public class PartitionerInstance {
     }
 
     public static String getResourceURI(String part) {
-        int endPosition = StringUtils.lastIndexOf(part, "/");
-        int startPosition = StringUtils.ordinalIndexOf(part, "/", 5) + 1;
+        int endPosition = StringUtils.lastIndexOf(part, Constants.Path.SLASH);
+        int startPosition = StringUtils.ordinalIndexOf(part, Constants.Path.SLASH, 5) + 1;
 
         String result;
-        if (part.substring(startPosition).contains("/")) {
+        if (part.substring(startPosition).contains(Constants.Path.SLASH)) {
             result = part.subSequence(startPosition, endPosition).toString();
         } else {
             result = part.subSequence(startPosition, part.length() - 1).toString();

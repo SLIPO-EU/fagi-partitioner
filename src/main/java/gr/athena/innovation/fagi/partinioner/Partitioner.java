@@ -31,7 +31,7 @@ public class Partitioner {
             arg = args[i];
             if (arg.startsWith("-")) {
                 if (arg.equals("-help")) {
-                    LOG.info(PartitioningConstants.HELP);
+                    LOG.info(Constants.HELP);
                     System.exit(-1);
                 }
             }
@@ -50,10 +50,8 @@ public class Partitioner {
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            LOG.info(PartitioningConstants.HELP);
+            LOG.info(Constants.HELP);
             System.exit(-1);
         }
     }
 }
-
-
