@@ -3,6 +3,7 @@ package gr.athena.innovation.fagi.partinioner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -14,6 +15,7 @@ import static java.nio.file.Files.newInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -100,7 +102,7 @@ public class PartitionerInstance {
         for (List<String> subList : subLists) {
             Path partitionPath = getPartitionPath(outputDirPath, sublistIndex);
             LOG.info("Computing for partition path: " + partitionPath);
-            Integer group = subList.hashCode();
+            //Integer group = subList.hashCode();
             for (String link : subList) {
                 String[] parts = link.split(Constants.SPLIT);
                 String idAPart = parts[0];
@@ -111,10 +113,10 @@ public class PartitionerInstance {
 
                 linksMap.put(idA, idB);
 
-                mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH + group.toString() 
-                        + Constants.Path.UNDERSCORE + Constants.Path.A + sublistIndex + Constants.Path.NT);
-                mapForDatasetB.put(idB, partitionPath + Constants.Path.SLASH + group.toString() 
-                        + Constants.Path.UNDERSCORE + Constants.Path.B + sublistIndex + Constants.Path.NT);
+                mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH 
+                        + Constants.Path.A + sublistIndex + Constants.Path.NT);
+                mapForDatasetB.put(idB, partitionPath + Constants.Path.SLASH 
+                        + Constants.Path.B + sublistIndex + Constants.Path.NT);
 
             }
             sublistIndex++;
@@ -164,6 +166,35 @@ public class PartitionerInstance {
         String totalTime = getFormattedTime(totalMillis);
         LOG.info("Total time: " + totalTime);
 
+        //renameFiles(mapForDatasetA, mapForDatasetB);
+    }
+
+    private void renameFiles(Multimap<String, String> mapForDatasetA, Multimap<String, String> mapForDatasetB) 
+            throws IOException {
+        //rename with the standard names
+        Collection<String> paths = new ArrayList<>();
+
+        paths.addAll(mapForDatasetA.values());
+        paths.addAll(mapForDatasetB.values());
+
+        for(String val : paths){
+            File oldfile = new File(val);
+            int startIndex = val.lastIndexOf(Constants.Path.UNDERSCORE);
+            int endIndex = val.lastIndexOf(Constants.Path.DOT);
+            
+            String name = val.substring(startIndex + 1, endIndex);
+            int replaceIndex = val.lastIndexOf(Constants.Path.SLASH);
+            String newPath = val.substring(0, replaceIndex);
+            String newFilename = newPath + Constants.Path.SLASH + name + Constants.Path.NT;
+            
+            File newfile = new File(newFilename);
+
+            if (oldfile.renameTo(newfile)) {
+                LOG.info("Success, renamed: " + val + " to:\n " + newFilename);
+            } else {
+                throw new IOException(oldfile + " was not successfully renamed to " + newFilename);
+            }
+        }
     }
 
     private Path getPartitionPath(Path resultPath, int sublistIndex) {

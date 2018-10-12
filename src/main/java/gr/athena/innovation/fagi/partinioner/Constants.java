@@ -23,7 +23,7 @@ public class Constants {
         public static final String CONFIG_XSD = "config.xsd";
 
         /**
-         * Name for left dataset tag in XML.
+         * Name for the partitioning tag in XML.
          */
         public static final String PARTITIONING = "partitioning";
 
@@ -67,6 +67,8 @@ public class Constants {
         public static final String SLASH = "/";
 
         public static final String UNDERSCORE = "_";
+        
+        public static final String DOT = ".";
 
         public static final String A = "A";
 
