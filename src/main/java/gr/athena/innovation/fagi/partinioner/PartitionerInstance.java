@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -34,11 +35,18 @@ public class PartitionerInstance {
         ConfigParser parser = new ConfigParser();
         Configuration config = parser.parse(configPath);
 
-        int partitionSize = Integer.parseInt(config.getLinkSize());
-        String datasetA = config.getDatasetA();
-        String datasetB = config.getDatasetB();
+        String datasetAPath = config.getDatasetA();
+        String datasetBPath = config.getDatasetB();
+        String unlinkedAPath = config.getUnlinkedPathA();
+        String unlinkedBPath = config.getUnlinkedPathB();
+        int partitions = config.getPartitions();
         String linksPath = config.getLinks();
         String outputDir = config.getOutputDir();
+
+        Path path = Paths.get(linksPath);
+        long lineCount = Files.lines(path).count();
+
+        int linksInEachPartition = (int) (lineCount / partitions);
 
         LOG.info("Process started.");
 
@@ -68,7 +76,7 @@ public class PartitionerInstance {
         }
 
         long stop = System.currentTimeMillis();
-        LOG.info(lines.size() + "links loaded in " + (stop - start) + "ms.");
+        LOG.info(lines.size() + " links loaded in " + (stop - start) + "ms.");
 
         long start2 = System.currentTimeMillis();
 
@@ -76,9 +84,9 @@ public class PartitionerInstance {
         List<List<String>> subLists = new ArrayList<>();
 
         int sublistIndex = 1;
-        for (int i = 0; i < lines.size(); i += partitionSize) {
+        for (int i = 0; i < lines.size(); i += linksInEachPartition) {
 
-            List<String> sublist = lines.subList(i, Math.min(i + partitionSize, lines.size()));
+            List<String> sublist = lines.subList(i, Math.min(i + linksInEachPartition, lines.size()));
 
             Path partitionPath = getPartitionPath(outputDirPath, sublistIndex);
             Files.createDirectories(partitionPath);
@@ -94,7 +102,12 @@ public class PartitionerInstance {
         //todo: user Properties/mapdb for 'on-disk' map
         Multimap<String, String> mapForDatasetA = ArrayListMultimap.create();
         Multimap<String, String> mapForDatasetB = ArrayListMultimap.create();
-        Multimap<String, String> linksMap = ArrayListMultimap.create();
+
+        //Use the linkedA, linkedB hashsets to write the unlinked entities in files 
+        //when reading the source datasets at DatasetPartitioner.
+
+        HashSet<String> linkedA = new HashSet<>();
+        HashSet<String> linkedB = new HashSet<>();
 
         System.out.println("Number of partitions: " + subLists.size());
 
@@ -111,7 +124,8 @@ public class PartitionerInstance {
                 String idA = getResourceURI(idAPart);
                 String idB = getResourceURI(idBPart);
 
-                linksMap.put(idA, idB);
+                linkedA.add(idA);
+                linkedB.add(idB);
 
                 mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH 
                         + Constants.Path.A + sublistIndex + Constants.Path.NT);
@@ -129,17 +143,17 @@ public class PartitionerInstance {
         long time2millis = stop2 - start2;
         String time2 = getFormattedTime(time2millis);
 
-        LOG.info((int) (lines.size() / partitionSize) + " partitions created for links " + time2 + ".");
+        LOG.info((int) (lines.size() / linksInEachPartition) + " partitions created for links " + time2 + ".");
 
         long start3 = System.currentTimeMillis();
 
         //Begin partitioning
         //ExecutorService pool = Executors.newFixedThreadPool(2);
-        //Callable<Long> callableA = new DatasetPartitioner(mapForDatasetA, datasetA);
-        //Callable<Long> callableB = new DatasetPartitioner(mapForDatasetB, datasetB);
+        //Callable<Long> callableA = new DatasetPartitioner(mapForDatasetA, datasetAPath);
+        //Callable<Long> callableB = new DatasetPartitioner(mapForDatasetB, datasetBPath);
         //LOG.info("map a: " + mapForDatasetA);
         //LOG.info("map b: " + mapForDatasetB);
-        DatasetPartitioner callableA = new DatasetPartitioner(mapForDatasetA, datasetA);
+        DatasetPartitioner callableA = new DatasetPartitioner(mapForDatasetA, linkedA, datasetAPath, unlinkedAPath);
 
         LOG.info("Starting process...");
 
@@ -151,7 +165,7 @@ public class PartitionerInstance {
         String threadTimeA = getFormattedTime(threadTimeMillisA);
         LOG.info("Dataset A partitioned in " + threadTimeA + ".");
 
-        DatasetPartitioner callableB = new DatasetPartitioner(mapForDatasetB, datasetB);
+        DatasetPartitioner callableB = new DatasetPartitioner(mapForDatasetB, linkedB, datasetBPath, unlinkedBPath);
         Long threadTimeMillisB = callableB.call();
         //Long threadTimeMillisB = futureB.get();
         String threadTimeB = getFormattedTime(threadTimeMillisB);

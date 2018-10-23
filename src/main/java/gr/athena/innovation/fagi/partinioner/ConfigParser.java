@@ -56,13 +56,29 @@ public class ConfigParser {
             String datasetB = b.item(0).getTextContent();
             configuration.setDatasetB(datasetB);
 
+            NodeList ua = doc.getElementsByTagName(Constants.XML.UNLINKED_A);
+            String unlinkedA = ua.item(0).getTextContent();
+            configuration.setUnlinkedPathA(unlinkedA);
+
+            NodeList ub = doc.getElementsByTagName(Constants.XML.UNLINKED_B);
+            String unlinkedB = ub.item(0).getTextContent();
+            configuration.setUnlinkedPathB(unlinkedB);
+
             NodeList l = doc.getElementsByTagName(Constants.XML.LINKS);
             String links = l.item(0).getTextContent();
             configuration.setLinks(links);
             
-            NodeList s = doc.getElementsByTagName(Constants.XML.LINK_SIZE);
-            String size = s.item(0).getTextContent();
-            configuration.setLinkSize(size);
+            NodeList s = doc.getElementsByTagName(Constants.XML.PARTITIONS);
+            String partitions = s.item(0).getTextContent();
+            
+            int partitionsNumber;
+            
+            try {
+                partitionsNumber = Integer.parseInt(partitions);
+            } catch (NumberFormatException e) {
+                throw new WrongInputException("Number of partitions is not an integer.");
+            }
+            configuration.setPartitions(partitionsNumber);
 
             NodeList m = doc.getElementsByTagName(Constants.XML.FUSION_MODE);
             String modeString = m.item(0).getTextContent();

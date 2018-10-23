@@ -2,8 +2,10 @@
 <partitioning>
 	<datasetA></datasetA>
 	<datasetB></datasetB>
+	<unlinkedA></unlinkedA>
+	<unlinkedB></unlinkedB>
 	<links></links>
-	<linkSize></linkSize>
+	<partitions></partitions>
 	<fusionMode>l_mode</fusionMode>
 	<outputDir></outputDir>
 </partitioning>

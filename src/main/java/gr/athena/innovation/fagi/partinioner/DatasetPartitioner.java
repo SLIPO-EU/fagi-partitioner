@@ -3,14 +3,21 @@ package gr.athena.innovation.fagi.partinioner;
 import com.google.common.collect.Multimap;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.logging.log4j.LogManager;
@@ -24,14 +31,32 @@ public class DatasetPartitioner {
 
     private static final Logger LOG = LogManager.getLogger(DatasetPartitioner.class);
     private final Multimap<String, String> map;
+    private final HashSet<String> linked;
     private final String datasetPath;
+    private final String unlinkedPath;
+    private final Path file;
 
-    public DatasetPartitioner(Multimap<String, String> map, String datasetPath){
+    public DatasetPartitioner(Multimap<String, String> map, HashSet<String> linked, String datasetPath, 
+            String unlinkedPath) throws IOException{
+        
         this.map = map;
+        this.linked = linked;
         this.datasetPath = datasetPath;
+        this.unlinkedPath = unlinkedPath;
+
+        File f = new File(unlinkedPath);
+        if (f.exists()) {
+            f.delete();
+            f.createNewFile();
+            LOG.info("exists. clearing.");
+        } else {
+            f.createNewFile();
+            LOG.info("does not exist. created.");
+        }
+        file = Paths.get(unlinkedPath);
     }
 
-    public Long call(){
+    public Long call() throws IOException{
         LOG.info("Thread dataset: " + datasetPath);
         long start = System.currentTimeMillis();
         
@@ -53,10 +78,19 @@ public class DatasetPartitioner {
 
         try (BufferedReader br = Files.newBufferedReader(Paths.get(datasetPath), StandardCharsets.UTF_8)) {
             LOG.info("Opening reader..");
+            List<String> bufferedLines = new ArrayList<>();
             for (String line; (line = br.readLine()) != null;) {
                 String[] parts = line.split(" ");
                 String idPart = parts[0];
                 String id = PartitionerInstance.getResourceURI(idPart);
+
+                if(!linked.contains(id)){
+                    bufferedLines.add(line);
+                    if(bufferedLines.size() > 1000){
+                        writeUnlinked(bufferedLines);
+                        bufferedLines.clear();
+                    }
+                }
 
                 Collection<String> groups = map.get(id);
 
@@ -66,9 +100,15 @@ public class DatasetPartitioner {
                     bufferedWriter.newLine();
                 }
             }
+
+            if(!bufferedLines.isEmpty()){
+                writeUnlinked(bufferedLines);
+                bufferedLines.clear();
+            }
             LOG.info("Closing reader..");
         } catch (IOException ex) {
             LOG.error(ex);
+            throw new IOException(ex);
         }
 
         LOG.info("Flushing data...");
@@ -91,4 +131,7 @@ public class DatasetPartitioner {
         return stop-start;
     }
 
+    private void writeUnlinked(List<String> lines) throws FileNotFoundException, IOException {
+        Files.write(file, lines, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+    }
 }

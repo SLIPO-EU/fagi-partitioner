@@ -38,14 +38,24 @@ public class Constants {
         public static final String DATASET_B = "datasetB";
 
         /**
+         * Name for left unlinked entities dataset tag in XML.
+         */
+        public static final String UNLINKED_A = "unlinkedA";
+
+        /**
+         * Name for right unlinked entities dataset tag in XML.
+         */
+        public static final String UNLINKED_B = "unlinkedB";
+
+        /**
          * Name for links tag in XML.
          */
         public static final String LINKS = "links";
-
+        
         /**
-         * Name for linkSize tag in XML.
+         * Name for number of partitions tag in XML.
          */
-        public static final String LINK_SIZE = "linkSize";
+        public static final String PARTITIONS = "partitions";
 
         /**
          * Name for fusion-mode tag in XML.

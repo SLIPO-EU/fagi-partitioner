@@ -17,8 +17,10 @@ public class Configuration {
     private String datasetA;
     private String datasetB;
     private String links;
-    private String linkSize;
+    private int partitions;
     private EnumOutputMode fusionMode;
+    private String unlinkedPathA;
+    private String unlinkedPathB;
     private String outputDir;
     
     private Configuration() {
@@ -57,14 +59,6 @@ public class Configuration {
         this.links = links;
     }
 
-    public String getLinkSize() {
-        return linkSize;
-    }
-
-    public void setLinkSize(String linkSize) {
-        this.linkSize = linkSize;
-    }
-
     public EnumOutputMode getFusionMode() {
         return fusionMode;
     }
@@ -79,5 +73,29 @@ public class Configuration {
 
     public void setOutputDir(String outputDir) {
         this.outputDir = outputDir;
+    }
+
+    public int getPartitions() {
+        return partitions;
+    }
+
+    public void setPartitions(int partitions) {
+        this.partitions = partitions;
+    }
+
+    public String getUnlinkedPathA() {
+        return unlinkedPathA;
+    }
+
+    public void setUnlinkedPathA(String unlinkedPathA) {
+        this.unlinkedPathA = unlinkedPathA;
+    }
+
+    public String getUnlinkedPathB() {
+        return unlinkedPathB;
+    }
+
+    public void setUnlinkedPathB(String unlinkedPathB) {
+        this.unlinkedPathB = unlinkedPathB;
     }
 }
