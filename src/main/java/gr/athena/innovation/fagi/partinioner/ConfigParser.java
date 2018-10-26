@@ -76,6 +76,7 @@ public class ConfigParser {
             try {
                 partitionsNumber = Integer.parseInt(partitions);
             } catch (NumberFormatException e) {
+                LOG.error(e);
                 throw new WrongInputException("Number of partitions is not an integer.");
             }
             configuration.setPartitions(partitionsNumber);
