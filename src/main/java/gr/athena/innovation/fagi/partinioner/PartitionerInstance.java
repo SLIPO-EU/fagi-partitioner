@@ -3,7 +3,6 @@ package gr.athena.innovation.fagi.partinioner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -15,7 +14,6 @@ import static java.nio.file.Files.newInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -91,7 +89,7 @@ public class PartitionerInstance {
             Path partitionPath = getPartitionPath(outputDirPath, sublistIndex);
             Files.createDirectories(partitionPath);
 
-            Path sublinksPath = Paths.get(partitionPath + Constants.Path.SLASH + Constants.Path.LINKS 
+            Path sublinksPath = Paths.get(partitionPath + Constants.Path.SLASH + Constants.Path.LINKS
                     + Constants.Path.UNDERSCORE + sublistIndex + Constants.Path.NT);
             Files.write(sublinksPath, sublist, StandardCharsets.UTF_8);
 
@@ -105,7 +103,6 @@ public class PartitionerInstance {
 
         //Use the linkedA, linkedB hashsets to write the unlinked entities in files 
         //when reading the source datasets at DatasetPartitioner.
-
         HashSet<String> linkedA = new HashSet<>();
         HashSet<String> linkedB = new HashSet<>();
 
@@ -127,9 +124,9 @@ public class PartitionerInstance {
                 linkedA.add(idA);
                 linkedB.add(idB);
 
-                mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH 
+                mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH
                         + Constants.Path.A + sublistIndex + Constants.Path.NT);
-                mapForDatasetB.put(idB, partitionPath + Constants.Path.SLASH 
+                mapForDatasetB.put(idB, partitionPath + Constants.Path.SLASH
                         + Constants.Path.B + sublistIndex + Constants.Path.NT);
 
             }
@@ -173,47 +170,17 @@ public class PartitionerInstance {
 
         //LOG.info("Shutting down pool...");
         //pool.shutdown();
-
         long stop3 = System.currentTimeMillis();
         long totalMillis = stop3 - start3;
 
         String totalTime = getFormattedTime(totalMillis);
         LOG.info("Total time: " + totalTime);
 
-        //renameFiles(mapForDatasetA, mapForDatasetB);
-    }
-
-    private void renameFiles(Multimap<String, String> mapForDatasetA, Multimap<String, String> mapForDatasetB) 
-            throws IOException {
-        //rename with the standard names
-        Collection<String> paths = new ArrayList<>();
-
-        paths.addAll(mapForDatasetA.values());
-        paths.addAll(mapForDatasetB.values());
-
-        for(String val : paths){
-            File oldfile = new File(val);
-            int startIndex = val.lastIndexOf(Constants.Path.UNDERSCORE);
-            int endIndex = val.lastIndexOf(Constants.Path.DOT);
-            
-            String name = val.substring(startIndex + 1, endIndex);
-            int replaceIndex = val.lastIndexOf(Constants.Path.SLASH);
-            String newPath = val.substring(0, replaceIndex);
-            String newFilename = newPath + Constants.Path.SLASH + name + Constants.Path.NT;
-            
-            File newfile = new File(newFilename);
-
-            if (oldfile.renameTo(newfile)) {
-                LOG.info("Success, renamed: " + val + " to:\n " + newFilename);
-            } else {
-                throw new IOException(oldfile + " was not successfully renamed to " + newFilename);
-            }
-        }
     }
 
     private Path getPartitionPath(Path resultPath, int sublistIndex) {
-        
-        Path partitionPath = Paths.get(resultPath + Constants.Path.SLASH + Constants.Path.PARTITION 
+
+        Path partitionPath = Paths.get(resultPath + Constants.Path.SLASH + Constants.Path.PARTITION
                 + Constants.Path.UNDERSCORE + sublistIndex);
 
         return partitionPath;

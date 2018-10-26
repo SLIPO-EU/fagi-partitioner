@@ -80,23 +80,6 @@ public class ConfigParser {
             }
             configuration.setPartitions(partitionsNumber);
 
-            NodeList m = doc.getElementsByTagName(Constants.XML.FUSION_MODE);
-            String modeString = m.item(0).getTextContent();
-            EnumOutputMode mode = EnumOutputMode.fromString(modeString.toUpperCase());
-            switch(mode) {
-                case AA_MODE:
-                case AB_MODE:
-                case A_MODE:
-                case BB_MODE:
-                case BA_MODE:
-                case B_MODE:
-                case L_MODE:
-                    configuration.setFusionMode(mode);
-                    break;
-                default:
-                    LOG.info("Mode not supported.");
-                    throw new UnsupportedOperationException("Wrong Output mode!");               
-            }
         } catch (ParserConfigurationException | SAXException | IOException | DOMException e) {
             LOG.fatal("Exception occured while parsing the configuration: "
                     + configurationPath + "\n" + e);

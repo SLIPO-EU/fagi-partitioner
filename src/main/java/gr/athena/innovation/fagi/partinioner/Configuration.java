@@ -18,7 +18,6 @@ public class Configuration {
     private String datasetB;
     private String links;
     private int partitions;
-    private EnumOutputMode fusionMode;
     private String unlinkedPathA;
     private String unlinkedPathB;
     private String outputDir;
@@ -57,14 +56,6 @@ public class Configuration {
 
     public void setLinks(String links) {
         this.links = links;
-    }
-
-    public EnumOutputMode getFusionMode() {
-        return fusionMode;
-    }
-
-    public void setFusionMode(EnumOutputMode fusionMode) {
-        this.fusionMode = fusionMode;
     }
 
     public String getOutputDir() {

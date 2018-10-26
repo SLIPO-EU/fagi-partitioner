@@ -124,7 +124,7 @@ public class DatasetPartitioner {
         }
         long stop3 = System.currentTimeMillis();
         
-        LOG.info("(time3) flushing time " + (stop3 - start3));
+        LOG.info("Flushing time " + (stop3 - start3));
         
         long stop = System.currentTimeMillis();
         LOG.info("thread returning. Time running was: " + (stop-start));
