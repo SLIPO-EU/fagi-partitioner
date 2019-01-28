@@ -33,7 +33,6 @@ public class DatasetPartitioner {
     private final Multimap<String, String> map;
     private final HashSet<String> linked;
     private final String datasetPath;
-    private final String unlinkedPath;
     private final Path file;
 
     public DatasetPartitioner(Multimap<String, String> map, HashSet<String> linked, String datasetPath, 
@@ -42,7 +41,6 @@ public class DatasetPartitioner {
         this.map = map;
         this.linked = linked;
         this.datasetPath = datasetPath;
-        this.unlinkedPath = unlinkedPath;
 
         File f = new File(unlinkedPath);
         if (f.exists()) {
@@ -80,6 +78,13 @@ public class DatasetPartitioner {
             LOG.info("Opening reader..");
             List<String> bufferedLines = new ArrayList<>();
             for (String line; (line = br.readLine()) != null;) {
+
+                //exclude transformation comments from output. Specifically "# Classification" and "# Transformation" lines.
+                //This ensures that the partitions with zero links will have also empty A and B empty files.
+                if(line.startsWith("#")){
+                    continue;
+                }
+
                 String[] parts = line.split(" ");
                 String idPart = parts[0];
                 String id = PartitionerInstance.getResourceURI(idPart);

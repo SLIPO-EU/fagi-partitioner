@@ -119,6 +119,13 @@ public class PartitionerInstance {
             Path partitionPath = getPartitionPath(outputDirPath, sublistIndex);
             LOG.info("Computing for partition path: " + partitionPath);
             //Integer group = subList.hashCode();
+            if(subList.isEmpty()){
+                mapForDatasetA.put("", partitionPath + Constants.Path.SLASH
+                        + Constants.Path.A + sublistIndex + Constants.Path.NT);
+                mapForDatasetB.put("", partitionPath + Constants.Path.SLASH
+                        + Constants.Path.B + sublistIndex + Constants.Path.NT);
+            }
+
             for (String link : subList) {
                 String[] parts = link.split(Constants.SPLIT);
                 String idAPart = parts[0];
@@ -146,8 +153,11 @@ public class PartitionerInstance {
         long time2millis = stop2 - start2;
         String time2 = getFormattedTime(time2millis);
 
-        LOG.info((int) (lines.size() / linksInEachPartition) + " partitions created for links " + time2 + ".");
+        LOG.info((int) (lines.size() / linksInEachPartition) + " non-empty partitions created for " + lines.size() 
+                + " links. Time: " + time2 + ".");
 
+        LOG.info("Total partitions created: " + subLists.size());
+        
         long start3 = System.currentTimeMillis();
 
         //Begin partitioning
@@ -213,11 +223,16 @@ public class PartitionerInstance {
     }
 
     public static String getFormattedTime(long millis) {
-        String time = String.format("%02d min, %02d sec",
-                TimeUnit.MILLISECONDS.toMinutes(millis),
-                TimeUnit.MILLISECONDS.toSeconds(millis)
-                - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
-        );
+        String time;
+        if(millis < 1000){
+            time = millis + "ms";
+        } else {
+            time = String.format("%02d min, %02d sec",
+                    TimeUnit.MILLISECONDS.toMinutes(millis),
+                    TimeUnit.MILLISECONDS.toSeconds(millis)
+                    - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+            );
+        }
         return time;
     }
 }
