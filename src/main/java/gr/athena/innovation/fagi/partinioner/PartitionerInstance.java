@@ -14,6 +14,7 @@ import static java.nio.file.Files.newInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -42,9 +43,10 @@ public class PartitionerInstance {
         String outputDir = config.getOutputDir();
 
         Path path = Paths.get(linksPath);
-        long lineCount = Files.lines(path).count();
+        int lineCount = (int) Files.lines(path).count();
 
-        int linksInEachPartition = (int) (lineCount / partitions);
+        // Ensure no more than the requested number of partitions is created  
+        int linksInEachPartition = (lineCount + partitions - 1) / partitions;
 
         LOG.info("Process started.");
 
@@ -72,6 +74,8 @@ public class PartitionerInstance {
                 }
             }
         }
+        if (lines.size() != lineCount)
+            throw new IllegalStateException("The number of links is different from previous count!");
 
         long stop = System.currentTimeMillis();
         LOG.info(lines.size() + " links loaded in " + (stop - start) + "ms.");
@@ -81,10 +85,12 @@ public class PartitionerInstance {
         //the first goal is to partition the source datasets to n->m partitions that correspond to the links.
         List<List<String>> subLists = new ArrayList<>();
 
+        // Generate directory structure for (exactly) the number of partitions requested 
         int sublistIndex = 1;
-        for (int i = 0; i < lines.size(); i += linksInEachPartition) {
+        for (int i = 0, n = 0; n < partitions; i += linksInEachPartition, n++) {
 
-            List<String> sublist = lines.subList(i, Math.min(i + linksInEachPartition, lines.size()));
+            List<String> sublist = i < lineCount? 
+                lines.subList(i, Math.min(i + linksInEachPartition, lineCount)) : Collections.emptyList();
 
             Path partitionPath = getPartitionPath(outputDirPath, sublistIndex);
             Files.createDirectories(partitionPath);
