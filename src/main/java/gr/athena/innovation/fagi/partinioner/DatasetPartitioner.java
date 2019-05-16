@@ -49,7 +49,7 @@ public class DatasetPartitioner {
             LOG.info("exists. clearing.");
         } else {
             f.createNewFile();
-            LOG.info("does not exist. created.");
+            LOG.info("File with unlinked data does not exist. Created.");
         }
         file = Paths.get(unlinkedPath);
     }
@@ -117,7 +117,7 @@ public class DatasetPartitioner {
         }
 
         LOG.info("Flushing data...");
-        
+
         long start3 = System.currentTimeMillis();
         for(BufferedWriter writer : writerMapA.values()){
             try {

@@ -126,21 +126,16 @@ public class PartitionerInstance {
                         + Constants.Path.B + sublistIndex + Constants.Path.NT);
             }
 
+            int lCount = 0;
             for (String link : subList) {
-                String[] parts = link.split(Constants.SPLIT);
-                String idAPart = parts[0];
-                String idBPart = parts[2];
 
-                String idA = getResourceURI(idAPart);
-                String idB = getResourceURI(idBPart);
+                processLinkNT(link, linkedA, linkedB, mapForDatasetA, partitionPath, sublistIndex, mapForDatasetB);
 
-                linkedA.add(idA);
-                linkedB.add(idB);
-
-                mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH
-                        + Constants.Path.A + sublistIndex + Constants.Path.NT);
-                mapForDatasetB.put(idB, partitionPath + Constants.Path.SLASH
-                        + Constants.Path.B + sublistIndex + Constants.Path.NT);
+                lCount++;
+                if (lCount % 1000000 == 0) {
+                    LOG.info("sublistIndex: " + sublistIndex + " - links processed: " + lCount);
+                    //break;
+                }
 
             }
             sublistIndex++;
@@ -194,6 +189,41 @@ public class PartitionerInstance {
 
     }
 
+    private void processLinkNT(String link, HashSet<String> linkedA, HashSet<String> linkedB, Multimap<String, String> mapForDatasetA, Path partitionPath, int sublistIndex, Multimap<String, String> mapForDatasetB) {
+        String[] parts = link.split(Constants.SPLIT);
+        String idAPart = parts[0];
+        String idBPart = parts[2];
+        
+        String idA = getResourceURI(idAPart);
+        String idB = getResourceURI(idBPart);
+        
+        linkedA.add(idA);
+        linkedB.add(idB);
+        
+        mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH
+                + Constants.Path.A + sublistIndex + Constants.Path.NT);
+        mapForDatasetB.put(idB, partitionPath + Constants.Path.SLASH
+                + Constants.Path.B + sublistIndex + Constants.Path.NT);
+    }
+
+//    private void processLinkCSV(String link, HashSet<String> linkedA, HashSet<String> linkedB, Multimap<String, String> mapForDatasetA, Path partitionPath, int sublistIndex, Multimap<String, String> mapForDatasetB) {
+//        String[] parts = link.split(Constants.SPLIT);
+//        String idAPart = parts[0];
+//        String idBPart = parts[1];
+//        
+//                
+//        String idA = getResourceURI(idAPart);
+//        String idB = getResourceURI(idBPart);
+//        
+//        linkedA.add(idA);
+//        linkedB.add(idB);
+//        
+//        mapForDatasetA.put(idA, partitionPath + Constants.Path.SLASH
+//                + Constants.Path.A + sublistIndex + Constants.Path.NT);
+//        mapForDatasetB.put(idB, partitionPath + Constants.Path.SLASH
+//                + Constants.Path.B + sublistIndex + Constants.Path.NT);
+//    }
+
     private Path getPartitionPath(Path resultPath, int sublistIndex) {
 
         Path partitionPath = Paths.get(resultPath + Constants.Path.SLASH + Constants.Path.PARTITION
@@ -221,6 +251,14 @@ public class PartitionerInstance {
 
         return result;
     }
+
+    //faster but not generic
+//    public static String getResourceURI(String part) {
+//        int endPosition = StringUtils.lastIndexOf(part, Constants.Path.SLASH);
+//
+//        String result = part.subSequence(24, 60).toString();
+//        return result;
+//    }
 
     public static String getFormattedTime(long millis) {
         String time;

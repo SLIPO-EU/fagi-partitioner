@@ -4,7 +4,7 @@
   <groupId>gr.athena.innovation</groupId>
   <artifactId>fagi-partitioner</artifactId>
   <name>fagi-partitioner</name>
-  <version>1.2.13</version>
+  <version>1.2.18</version>
   <build>
     <plugins>
       <plugin>
